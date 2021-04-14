@@ -19,54 +19,64 @@ import java.util.List;
 
 public class App {
 
-    public  static Quotes[] initialize() throws Exception{
-        Gson  gson =new Gson();
-        Path path= Paths.get( "app/src/main/resources/recentquotes.json");
+    public static Quotes[] initialize() throws Exception {
+        Gson gson = new Gson();
+        Path path = Paths.get("app/src/main/resources/recentquotes.json");
         File file = new File(path.toAbsolutePath().toUri());
-        Reader reader=new  FileReader(file);
-        Quotes[] quotes = gson.fromJson(reader,  Quotes[].class);
+        Reader reader = new FileReader(file);
+        Quotes[] quotes = gson.fromJson(reader, Quotes[].class);
         reader.close();
         return quotes;
     }
 
-    public  static String  searchByAuthorName( Quotes[] quotes,String authorName) throws Exception{
+    public static String searchByAuthorName(Quotes[] quotes, String authorName) throws Exception {
 
-        for (Quotes quote: quotes) {
-            if (quote.getAuthor().contains( authorName))
+        for (Quotes quote : quotes) {
+            if (quote.getAuthor().contains(authorName))
                 return quote.toString();
         }
         return "Author Not Found";
     }
 
-    public  static String  searchByTextContain( Quotes[] quotes,String words) throws Exception{
+    public static String searchByTextContain(Quotes[] quotes, String words) throws Exception {
 
-        for (Quotes quote: quotes) {
-            if (quote.getText().contains(words) )
+        for (Quotes quote : quotes) {
+            if (quote.getText().contains(words))
                 return quote.toString();
         }
         return "Can't Search Words ";
     }
 
+    public static String searchByRandom(Quotes[] quotes) throws Exception {
+        int random= (int) (Math.random() * quotes.length) ;
+        Quotes quote = quotes[random];
+        return quote.toString();
+    }
+
 
     public static void main(String[] args) throws Exception {
         Quotes[] quotes;
-        quotes= initialize();
-        System.out.println(searchByTextContain(quotes,"intimidating"));
+        quotes = initialize();
+        System.out.println(searchByRandom(quotes));
 
-        if(args.length ==2 && args[0]=="author"){
-             quotes= initialize();
-            System.out.println(searchByAuthorName(quotes,args[1]));
+        if (args.length == 2 && args[0] == "author") {
+            quotes = initialize();
+            System.out.println(searchByAuthorName(quotes, args[1]));
 
-        }else if(args.length== 2 && args[0]=="contains" ){
+        } else if (args.length == 2 && args[0] == "contains") {
 
-            quotes= initialize();
-            System.out.println(searchByTextContain(quotes,args[1]));
+            quotes = initialize();
+            System.out.println(searchByTextContain(quotes, args[1]));
+
+        } else if (args.length == 1 && args[0] == "random") {
+            quotes = initialize();
+            System.out.println(searchByRandom(quotes));
 
         } else {
-            System.out.println("Allowed parameters are \'author < author name>\' or  \'contains <words >\' ");
+            System.out.println("Allowed parameters are \'author < author name>\' or  \'contains <words >\' or random ");
         }
 
 
-
     }
+
 }
