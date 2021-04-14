@@ -32,4 +32,13 @@ public class AppTest {
         reader.close();
         searchByAuthorName(quotes,"love");
     }
+
+    @Test public void testSearchByRandom() throws Exception {
+        Gson gson =new Gson();
+        File file = new File("../app/src/main/resources/recentquotes.json");
+        Reader reader=new FileReader(file);
+        Quotes[] quotes = gson.fromJson(reader,  Quotes[].class);
+        reader.close();
+        searchByRandom(quotes);
+    }
 }
