@@ -1,13 +1,19 @@
 package quotes;
-
 import java.util.ArrayList;
 import java.util.List;
 
-class Quotes {
+public class Quotes {
     private    ArrayList<String> tags;
     private    String author;
     private    String likes;
+    private    String text;
+    Quotes(ArrayList<String> tags, String author, String  likes, String  text){
+        setTags(tags);
+        setAuthor(author);
+        setLikes(likes);
+        setText(text);
 
+    }
     public String getText() {
         return text;
     }
@@ -15,8 +21,6 @@ class Quotes {
     public void setText(String text) {
         this.text = text;
     }
-
-    private    String text;
 
     public ArrayList<String> getTags() {
         return tags;

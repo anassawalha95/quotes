@@ -18,4 +18,4 @@ command `compile 'com.google.code.gson:gson:2.8.0'`
 
 2. `./gradlew run --args 'contains <words>'` to search by keyword inside a quote
 
-3. `./gradlew run --args 'random'` to show a random quote
+3. `./gradlew run --args 'random'` to get a quote from an api, if the api has an issue it will show a saved one
