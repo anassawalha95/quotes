@@ -4,29 +4,114 @@
 package quotes;
 
 import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.Reader;
-import java.lang.reflect.Type;
+import java.io.*;
+import java.net.HttpURLConnection;
+
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class App {
 
+
+
+    private static String localPath= "src/main/resources/recentquotes.json";
+    private static String remoteApiPath= "https://api.forismatic.com/api/1.0/?method=getQuote&format=json&lang=en";
+
+    public static URI getAbsolutePath(String path){
+        Path absolutePath= Paths.get(path);
+        return absolutePath.toAbsolutePath().toUri();
+
+    }
+    public static void appendQuote(forismatic forismatObject){
+         ArrayList<String> tags=new ArrayList<>();
+         String likes="";
+
+
+        try{
+            Quotes fromAPi=new Quotes(tags,forismatObject.getQuoteAuthor(),likes,forismatObject.getQuoteText());
+            Gson gson=new Gson();
+            File file= new File(getAbsolutePath(localPath));
+            Reader reader = new FileReader(file);
+            Quotes [] tempQuotes= gson.fromJson(reader, Quotes[].class);
+            reader.close();
+            Quotes [] fileQuotes=new Quotes[tempQuotes.length+1];
+            for(int i=0;i<tempQuotes.length;i++){
+                fileQuotes[i]=tempQuotes[i];
+            }
+            fileQuotes[tempQuotes.length]=fromAPi;
+            FileWriter  writeNewQuote= new FileWriter(file,false);
+            writeNewQuote.write(gson.toJson(fileQuotes));
+            writeNewQuote.close();
+        }catch (Exception ex){
+            System.out.println(ex);
+        }
+
+    }
+    public static int  initializeRemote(String remoteUrl) throws Exception {
+        forismatic forismat;
+        URL url = new URL(remoteUrl);
+        try {
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.29 Safari/537.36");
+            if(connection.getResponseCode() == 200) {
+                String JsonData ;
+                BufferedReader reader = getBufferedReader(connection);
+                JsonData = getContent(reader);
+                forismat =  initialize(JsonData);
+                appendQuote(forismat);
+                System.out.println(forismat.toString());
+                reader.close();
+                connection.disconnect();
+                return connection.getResponseCode();
+            }
+        } catch (MalformedURLException e) {
+            //e.printStackTrace();
+        } catch (IOException ioException) {
+            //e.printStackTrace();
+        }
+        return  -1;
+
+    }
+    private static BufferedReader getBufferedReader(HttpURLConnection connection) throws IOException {
+        InputStream inputStream = connection.getInputStream();
+        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+        BufferedReader reader =new BufferedReader(inputStreamReader);
+        return reader;
+    }
+
+    private  static String getContent(BufferedReader reader) throws IOException {
+        StringBuilder builder = new StringBuilder();
+        String currentLine = reader.readLine();
+        while(currentLine != null){
+            builder.append(currentLine);
+            currentLine = reader.readLine();
+        }
+        return builder.toString();
+    }
+
+
+
     public static Quotes[] initialize() throws Exception {
         Gson gson = new Gson();
-        Path path = Paths.get("app/src/main/resources/recentquotes.json");
-        File file = new File(path.toAbsolutePath().toUri());
+
+        File file = new File(getAbsolutePath(localPath));
         Reader reader = new FileReader(file);
         Quotes[] quotes = gson.fromJson(reader, Quotes[].class);
         reader.close();
         return quotes;
+    }
+
+    public static forismatic initialize(String JasonData) throws Exception {
+        Gson gson = new Gson();
+        forismatic formast = gson.fromJson(JasonData, forismatic.class);
+        return formast;
     }
 
     public static String searchByAuthorName(Quotes[] quotes, String authorName) throws Exception {
@@ -56,27 +141,30 @@ public class App {
 
     public static void main(String[] args) throws Exception {
         Quotes[] quotes;
-        quotes = initialize();
-        System.out.println(searchByRandom(quotes));
 
-        if (args.length == 2 && args[0] == "author") {
+        if (args.length == 2 && args[0].equals("author") ) {
             quotes = initialize();
             System.out.println(searchByAuthorName(quotes, args[1]));
 
-        } else if (args.length == 2 && args[0] == "contains") {
-
+        } else if (args.length == 2 && args[0].equals("contains")) {
             quotes = initialize();
             System.out.println(searchByTextContain(quotes, args[1]));
 
-        } else if (args.length == 1 && args[0] == "random") {
-            quotes = initialize();
-            System.out.println(searchByRandom(quotes));
-
-        } else {
-            System.out.println("Allowed parameters are \'author < author name>\' or  \'contains <words >\' or random ");
-        }
+        } else if (args.length == 1 && args[0].equals("random")) {
 
 
+              int StatusCode =  initializeRemote(remoteApiPath);
+
+              if(StatusCode != 200) {
+
+                    System.out.println("Somthing went Wrong From Api A Saved Quote will be generated ");
+                    quotes = initialize();
+                    System.out.println(searchByRandom(quotes));
+                }
+
+                } else {
+                    System.out.println("Allowed parameters are \'author <author name>\' or  \'contains <words>\' or random ");
+                }
     }
 
 }
