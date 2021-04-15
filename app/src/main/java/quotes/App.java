@@ -21,7 +21,7 @@ public class App {
 
     public static Quotes[] initialize() throws Exception {
         Gson gson = new Gson();
-        Path path = Paths.get("app/src/main/resources/recentquotes.json");
+        Path path = Paths.get("src/main/resources/recentquotes.json");
         File file = new File(path.toAbsolutePath().toUri());
         Reader reader = new FileReader(file);
         Quotes[] quotes = gson.fromJson(reader, Quotes[].class);
@@ -56,24 +56,21 @@ public class App {
 
     public static void main(String[] args) throws Exception {
         Quotes[] quotes;
-        quotes = initialize();
-        System.out.println(searchByRandom(quotes));
 
-        if (args.length == 2 && args[0] == "author") {
+        if (args.length == 2 && args[0].equals("author") ) {
             quotes = initialize();
             System.out.println(searchByAuthorName(quotes, args[1]));
 
-        } else if (args.length == 2 && args[0] == "contains") {
-
+        } else if (args.length == 2 && args[0].equals("contains")) {
             quotes = initialize();
             System.out.println(searchByTextContain(quotes, args[1]));
 
-        } else if (args.length == 1 && args[0] == "random") {
+        } else if (args.length == 1 && args[0].equals("random")) {
             quotes = initialize();
             System.out.println(searchByRandom(quotes));
 
         } else {
-            System.out.println("Allowed parameters are \'author < author name>\' or  \'contains <words >\' or random ");
+            System.out.println("Allowed parameters are \'author <author name>\' or  \'contains <words>\' or random ");
         }
 
 
