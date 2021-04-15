@@ -102,6 +102,7 @@ public class App {
         Gson gson = new Gson();
 
         File file = new File(getAbsolutePath(localPath));
+
         Reader reader = new FileReader(file);
         Quotes[] quotes = gson.fromJson(reader, Quotes[].class);
         reader.close();
@@ -151,7 +152,6 @@ public class App {
             System.out.println(searchByTextContain(quotes, args[1]));
 
         } else if (args.length == 1 && args[0].equals("random")) {
-
 
               int StatusCode =  initializeRemote(remoteApiPath);
 
